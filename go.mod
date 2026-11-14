@@ -19,6 +19,6 @@ require (
 	github.com/xeipuuv/gojsonpointer v0.0.0-20170225233418-6fe8760cad35 // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20150808065054-e02fc20de94c // indirect
 	github.com/xeipuuv/gojsonschema v0.0.0-20170528113821-0c8571ac0ce1
-	golang.org/x/sys v0.0.0-20170407050850-f3918c30c5c2
+	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
