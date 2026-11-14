@@ -1,101 +1,48 @@
-// +build !selinux !linux
-
 package label
 
-// InitLabels returns the process label and file labels to be used within
-// the container.  A list of options can be passed into this function to alter
-// the labels.
-func InitLabels(options []string) (string, string, error) {
-	return "", "", nil
-}
+import (
+	"fmt"
 
-func ROMountLabel() string {
-	return ""
-}
+	"github.com/opencontainers/selinux/go-selinux"
+)
 
-func GenLabels(options string) (string, string, error) {
-	return "", "", nil
-}
-
-func FormatMountLabel(src string, mountLabel string) string {
-	return src
-}
-
-func SetProcessLabel(processLabel string) error {
-	return nil
-}
-
-func ProcessLabel() (string, error) {
-	return "", nil
-}
-
-func SetSocketLabel(processLabel string) error {
-	return nil
-}
-
-func SocketLabel() (string, error) {
-	return "", nil
-}
-
-func FileLabel(path string) (string, error) {
-	return "", nil
-}
-
-func SetFileLabel(path string, fileLabel string) error {
-	return nil
-}
-
-func SetFileCreateLabel(fileLabel string) error {
-	return nil
-}
-
-func Relabel(path string, fileLabel string, shared bool) error {
-	return nil
-}
-
-func PidLabel(pid int) (string, error) {
-	return "", nil
-}
-
+// Init initialises the labeling system
 func Init() {
+	_ = selinux.GetEnabled()
 }
 
-// ClearLabels clears all reserved labels
-func ClearLabels() {
-	return
+// FormatMountLabel returns a string to be used by the mount command. Using
+// the SELinux `context` mount option. Changing labels of files on mount
+// points with this option can never be changed.
+// FormatMountLabel returns a string to be used by the mount command.
+// The format of this string will be used to alter the labeling of the mountpoint.
+// The string returned is suitable to be used as the options field of the mount command.
+// If you need to have additional mount point options, you can pass them in as
+// the first parameter.  Second parameter is the label that you wish to apply
+// to all content in the mount point.
+func FormatMountLabel(src, mountLabel string) string {
+	return FormatMountLabelByType(src, mountLabel, "context")
 }
 
-func ReserveLabel(label string) error {
-	return nil
-}
-
-func ReleaseLabel(label string) error {
-	return nil
-}
-
-// DupSecOpt takes a process label and returns security options that
-// can be used to set duplicate labels on future container processes
-func DupSecOpt(src string) ([]string, error) {
-	return nil, nil
-}
-
-// DisableSecOpt returns a security opt that can disable labeling
-// support for future container processes
-func DisableSecOpt() []string {
-	return nil
-}
-
-// Validate checks that the label does not include unexpected options
-func Validate(label string) error {
-	return nil
-}
-
-// RelabelNeeded checks whether the user requested a relabel
-func RelabelNeeded(label string) bool {
-	return false
-}
-
-// IsShared checks that the label includes a "shared" mark
-func IsShared(label string) bool {
-	return false
+// FormatMountLabelByType returns a string to be used by the mount command.
+// Allow caller to specify the mount options. For example using the SELinux
+// `fscontext` mount option would allow certain container processes to change
+// labels of files created on the mount points, where as `context` option does
+// not.
+// FormatMountLabelByType returns a string to be used by the mount command.
+// The format of this string will be used to alter the labeling of the mountpoint.
+// The string returned is suitable to be used as the options field of the mount command.
+// If you need to have additional mount point options, you can pass them in as
+// the first parameter.  Second parameter is the label that you wish to apply
+// to all content in the mount point.
+func FormatMountLabelByType(src, mountLabel, contextType string) string {
+	if mountLabel != "" {
+		switch src {
+		case "":
+			src = fmt.Sprintf("%s=%q", contextType, mountLabel)
+		default:
+			src = fmt.Sprintf("%s,%s=%q", src, contextType, mountLabel)
+		}
+	}
+	return src
 }
